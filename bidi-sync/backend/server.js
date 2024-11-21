@@ -1,9 +1,10 @@
-import express from 'express';
-import cors from 'cors';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+import express from 'express';
+import cors from 'cors';
+import jwt from 'jsonwebtoken';
 
 console.log('WORKSPACE_KEY:', process.env.WORKSPACE_KEY);
 console.log('WORKSPACE_SECRET:', process.env.WORKSPACE_SECRET);
