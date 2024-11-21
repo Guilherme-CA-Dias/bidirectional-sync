@@ -47,12 +47,50 @@ function App() {
   );
 }
 
-function MyComponent(){
+function MyComponent() {
   const integrationApp = useIntegrationApp();
+  const [integrations, setIntegrations] = useState([]);
+
+  // Fetch available integrations
+  useEffect(() => {
+    const fetchIntegrations = async () => {
+      try {
+        const { items: integrations } = await integrationApp.integrations.find();
+        console.log("Fetched Integrations Payload", integrations); // Log payload for debugging
+        setIntegrations(integrations);
+      } catch (error) {
+        console.error("Error fetching integrations:", error);
+      }
+    };
+
+    fetchIntegrations();
+  }, [integrationApp]);
 
   return (
     <div>
       <button onClick={() => integrationApp.open()}>Integrate</button>
+      <h2>Avaiable integrations</h2>
+      <ul>
+        {integrations.map((integration) => (
+          <li key={integration.id} style={{ marginBottom: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img
+                src={integration.logoUri}
+                alt={integration.name}
+                style={{ width: "30px", height: "30px", marginRight: "10px" }}
+              />
+              <span>
+                {integration.name} -{" "}
+                {integration.connection?.disconnected === false ? (
+                       <span style={{ color: "green" }}>Connected</span>
+                       ) : (
+                       <span style={{ color: "red" }}>Not Connected</span>
+                       )}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
