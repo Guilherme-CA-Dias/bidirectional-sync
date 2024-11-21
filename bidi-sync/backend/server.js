@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log('WORKSPACE_KEY:', process.env.WORKSPACE_KEY);
+console.log('WORKSPACE_SECRET:', process.env.WORKSPACE_SECRET);
+
 const app = express();
 const PORT = 5000;
 
@@ -37,10 +40,16 @@ app.post('/api/generate-token', (req, res) => {
       algorithm: 'HS512',
     };
   
+  // Debugging the token data
+  console.log('Token Data:', tokenData);
+  console.log('Options:', options);
+
+
     try {
       const token = jwt.sign(tokenData, WORKSPACE_SECRET, options);
       res.json({ token });
     } catch (error) {
+      console.error('JWT Generation Error:', error.message); // Log the exact error
       res.status(500).json({ error: 'Failed to generate token.' });
     }
   });
