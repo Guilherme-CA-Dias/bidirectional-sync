@@ -42,14 +42,15 @@ function App() {
       // );
 
       <IntegrationAppProvider token={token}>
-      <MyComponent />
+      <MyComponent customerId={customerId} />
     </IntegrationAppProvider>
   );
 }
 
-function MyComponent() {
+function MyComponent({ customerId }) {
   const integrationApp = useIntegrationApp();
   const [integrations, setIntegrations] = useState([]);
+  const [companies, setCompanies] = useState([])
 
   // Fetch available integrations
   useEffect(() => {
@@ -65,6 +66,24 @@ function MyComponent() {
 
     fetchIntegrations();
   }, [integrationApp]);
+
+  // Fetch companies for the current customer
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get('https://scaling-space-meme-gppgx6xqq4j2w756-5000.app.github.dev/api/companies', {
+          params: { customerId },
+        });
+        console.log('Fetched companies', response.data);
+        setCompanies(response.data);
+      } catch (error) {
+        console.log('Error Fetching companies', error);
+      }
+    };
+
+    fetchCompanies();
+  }, [customerId]);
+
 
   return (
     <div>
@@ -88,6 +107,16 @@ function MyComponent() {
                        )}
               </span>
             </div>
+          </li>
+        ))}
+      </ul>
+
+      
+      <h2>Companies</h2>
+      <ul>
+        {companies.map((company) => (
+          <li key={company.id}>
+              <strong>{company.name}</strong> - {company.domain} - {company.address}
           </li>
         ))}
       </ul>
