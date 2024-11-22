@@ -23,6 +23,7 @@ const WORKSPACE_SECRET = process.env.WORKSPACE_SECRET;
 app.post('/api/generate-token', (req, res) => {
     const { customerId, customerName } = req.body;
   
+    // error to provide customer name and ID
     if (!customerId || !customerName) {
       return res.status(400).json({ error: 'Customer ID and name are required.' });
     }
