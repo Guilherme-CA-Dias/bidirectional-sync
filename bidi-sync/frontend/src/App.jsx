@@ -84,14 +84,25 @@ function MyComponent({ customerId }) {
     fetchCompanies();
   }, [customerId]);
 
+  // Function to open the configuration modal for a specific integration
+  const handleConfigure = (integrationKey) => {
+    try {
+      integrationApp.integration(integrationKey).open();
+    } catch (error) {
+      console.log(`Error openning configuration for ${integrationKey}`, error);
+    }
+  };
+
 
   return (
     <div>
-      <button onClick={() => integrationApp.open()}>Integrate</button>
+      <button onClick={() => integrationApp.open()}>Select and connect to integrations using our UI</button>
+      <hr></hr>
       <h2>Avaiable integrations</h2>
       <ul>
         {integrations.map((integration) => (
           <li key={integration.id} style={{ marginBottom: "10px" }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <img
                 src={integration.logoUri}
@@ -107,11 +118,16 @@ function MyComponent({ customerId }) {
                        )}
               </span>
             </div>
+            {/* Configure button for every integration */}
+                <button onClick={() => handleConfigure(integration.key)}>
+                  Configure {integration.name}
+                  </button>
+              </div>
           </li>
         ))}
       </ul>
 
-      
+      <hr></hr>
       <h2>Companies</h2>
       <ul>
         {companies.map((company) => (
