@@ -97,5 +97,5 @@ app.post('/api/generate-token', (req, res) => {
   );
 
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT} or the one specific for the github conding space you are on:`);
   });

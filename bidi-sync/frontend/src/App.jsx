@@ -11,7 +11,7 @@ function App() {
     useEffect(() => {
       const fetchToken = async () => {
         try {
-            const response = await axios.post('https://scaling-space-meme-gppgx6xqq4j2w756-5000.app.github.dev/api/generate-token', {
+            const response = await axios.post('https://orange-couscous-jggxr9r55x62qp7v-5000.app.github.dev/api/generate-token', {
                 customerId,
                 customerName,
             });
@@ -71,7 +71,7 @@ function MyComponent({ customerId }) {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('https://scaling-space-meme-gppgx6xqq4j2w756-5000.app.github.dev/api/companies', {
+        const response = await axios.get('https://orange-couscous-jggxr9r55x62qp7v-5000.app.github.dev/api/companies', {
           params: { customerId },
         });
         console.log('Fetched companies', response.data);
