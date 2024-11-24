@@ -85,13 +85,23 @@ function MyComponent({ customerId }) {
   }, [customerId]);
 
 
+  const handleConfigure = (integrationKey) => {
+    try {
+      integrationApp.integration(integrationKey).open();
+    } catch (error) {
+      console.log(`Error openning configuration for ${integrationKey}`, error);
+    }
+  };
+
+
   return (
     <div>
-      <button onClick={() => integrationApp.open()}>Integrate</button>
+      <button onClick={() => integrationApp.open()}>Select and connect to integrations using our UI</button>
       <h2>Avaiable integrations</h2>
       <ul>
         {integrations.map((integration) => (
           <li key={integration.id} style={{ marginBottom: "10px" }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <img
                 src={integration.logoUri}
@@ -107,6 +117,10 @@ function MyComponent({ customerId }) {
                        )}
               </span>
             </div>
+            {integration.key === 'hubspot' && (
+                <button onClick={() => handleConfigure(integration.key)}>Configure Hubspot</button>
+              )}
+              </div>
           </li>
         ))}
       </ul>
