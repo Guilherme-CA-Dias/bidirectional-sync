@@ -32,7 +32,6 @@ const WORKSPACE_SECRET = process.env.WORKSPACE_SECRET;
     `).run();
 
   // dummy data
-
   const dummyData = [
     { customer_id: '12345', name: 'Acme Inc.', domain: 'acme.com', address: '123 Acme St' },
     { customer_id: '12345', name: 'Tech Solutions', domain: 'techsolutions.com', address: '456 Tech Ave' },
@@ -44,10 +43,35 @@ const WORKSPACE_SECRET = process.env.WORKSPACE_SECRET;
     const exists = db.prepare('SELECT COUNT(*) AS count FROM companies WHERE customer_id = ? AND NAME = ?').get(customer_id, name).count;
 
     if (exists === 0) {
-      db.prepare('INSERT INTO companies (customer_id, name, domain, address) VALUES (?, ?, ?, ?)').run(customer_id, name, domain, address);
+      db.prepare('INSERT INTO companies (customer_id, "name", domain, address) VALUES (?, ?, ?, ?)').run(customer_id, name, domain, address);
     }
   });
 
+// Add companies fetched from hubspot
+app.post('/api/add-companies', (req, res) => {
+  const { customerId, companies } = req.body;
+
+  if (!customerId || !Array.isArray(companies)) {
+    return res.status(400).json({ error: 'Invalid input: customerId and companies array are required.'});
+  }
+
+  try {
+    const insertStmt = db.prepare('INSERT INTO companies (customer_id, "name", domain, address) VALUES (?, ?, ?, ?)');
+
+    companies.forEach(({ name, domain, address }) => {
+      const exists = db.prepare('SELECT COUNT(*) AS count FROM companies WHERE customer_id = ? AND name = ?').get(customerId, name).count;
+
+      if (exists === 0) {
+        insertStmt.run(customerId, name, domain || 'N/A', address || 'N/A');
+      }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error adding companies', error.message);
+    res.status(500).json({ error: 'Failed to add companies to the database' });
+  };
+});
 
 // Endpoint to generate token
 app.post('/api/generate-token', (req, res) => {
@@ -99,3 +123,34 @@ app.post('/api/generate-token', (req, res) => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT} or the one specific for the github conding space you are on:`);
   });
+
+// Clean table to its original state
+app.get('/api/reset-companies', (req, res) => {
+  const { clearTable } = req.query;
+
+  if (clearTable) {
+    try {
+      // Clear all rows from the companies table
+      db.prepare('DELETE FROM companies').run();
+
+      // Optionally, reinsert the original dummy data
+      const dummyData = [
+        { customer_id: '12345', name: 'Acme Inc.', domain: 'acme.com', address: '123 Acme St' },
+        { customer_id: '12345', name: 'Tech Solutions', domain: 'techsolutions.com', address: '456 Tech Ave' },
+        { customer_id: '12345', name: 'Widgets Corp.', domain: 'widgets.com', address: '789 Widget Blvd' },
+      ];
+
+      const insertStmt = db.prepare('INSERT INTO companies (customer_id, name, domain, address) VALUES (?, ?, ?, ?)');
+      dummyData.forEach(({ customer_id, name, domain, address }) => {
+        insertStmt.run(customer_id, name, domain, address);
+      });
+
+      res.json({ success: true, message: 'Companies table has been reset to its original state.' });
+    } catch (error) {
+      console.error('Error resetting companies table:', error.message);
+      res.status(500).json({ error: 'Failed to reset companies table.' });
+    }
+  } else {
+    res.status(400).json({ error: 'Invalid query parameter. Use ?clearTable=true to reset the table.' });
+  }
+});
