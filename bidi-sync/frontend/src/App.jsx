@@ -11,7 +11,7 @@ function App() {
     useEffect(() => {
       const fetchToken = async () => {
         try {
-            const response = await axios.post('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/generate-token', {
+            const response = await axios.post('http://localhost:5000/api/generate-token', {
                 customerId,
                 customerName,
             });
@@ -79,7 +79,7 @@ function MyComponent({ customerId }) {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/companies', {
+        const response = await axios.get('http://localhost:5000/api/companies', {
           params: { customerId },
         });
         console.log('Fetched companies', response.data);
