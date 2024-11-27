@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IntegrationAppProvider, useIntegrationApp } from '@integration-app/react';
+import { IntegrationAppProvider, useIntegrationApp, IntegrationAppClient } from '@integration-app/react';
 import axios from 'axios';
 import './App.css';
 
@@ -58,21 +58,36 @@ function App() {
 function MyComponent({ customerId }) {
   const integrationApp = useIntegrationApp();
   const [integrations, setIntegrations] = useState([]);
+  const [flowStatuses, setFlowStatuses] = useState({}); // State to track flow statuses
   const [companies, setCompanies] = useState([])
 
-  // Fetch available integrations
+ // Fetch integrations and flow statuses
   useEffect(() => {
-    const fetchIntegrations = async () => {
+    const fetchIntegrationsAndFlows = async () => {
       try {
         const { items: integrations } = await integrationApp.integrations.find();
         console.log("Fetched Integrations Payload", integrations); // Log payload for debugging
         setIntegrations(integrations);
+
+        // Fetch flow statuses only for connected integrations
+        const connectedIntegrations = integrations.filter(
+          (integration) => integration.connection?.disconnected === false
+        );
+
+        const statuses = {};
+        for (const integration of connectedIntegrations) {
+          const response = await integrationApp.connection(integration.key).flows.list();
+          const flow = response.items.find((f) => f.name === 'Receive Company Events');
+          statuses[integration.key] = flow?.enabled || false;
+        }
+        setFlowStatuses(statuses);
+
       } catch (error) {
         console.error("Error fetching integrations:", error);
       }
     };
 
-    fetchIntegrations();
+    fetchIntegrationsAndFlows();
   }, [integrationApp]);
 
   // Fetch companies for the current customer
@@ -91,6 +106,29 @@ function MyComponent({ customerId }) {
 
     fetchCompanies();
   }, [customerId]);
+
+
+ // Toggle flow enable/disable
+  const handleToggleFlow = async (integrationKey, isChecked) => {
+    try {
+      await integrationApp
+        .connection(integrationKey)
+        .flow('receive-company-events')
+        .patch({ enabled: isChecked });
+
+      setFlowStatuses((prev) => ({
+        ...prev,
+        [integrationKey]: isChecked,
+      }));
+
+      alert(`Flow ${isChecked ? 'enabled' : 'disabled'} for ${integrationKey}`);
+    } catch (error) {
+      console.error(`Error toggling flow for ${integrationKey}:`, error.message);
+      alert('Failed to update flow status.');
+    }
+  };
+
+
 
 // Function to fetch companies from CRMs
 const fetchCompaniesFromConnectedIntegrations = async () => {
@@ -119,7 +157,7 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
 
         console.log(`processed companies for ${integration.name}:`, companies);
 
-        await axios.post('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/add-companies', {
+        await axios.post('http://localhost:5000/api/add-companies', {
             customerId,
             companies,
         });
@@ -131,23 +169,8 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
 
       };
 
-      // const response1 = await integrationApp.connection('hubspot').action('get-companies').run({});
-      // console.log('HubSpot Response:', response1);
-      //   const data = response1.output.records;
-      //     console.log('Companies:', data);
-
-      //     // Send companies to server.js for storage
-      //     await axios.post('http://localhost:5000/api/add-companies', {
-      //       customerId,
-      //       companies: data.map((company) => ({
-      //         name: company.fields.name || 'N/A',
-      //     domain: company.fields.websiteUrl || 'N/A',
-      //     address: company.fields.primaryAddress?.full || 'N/A',
-      //       })),
-      //     });
-
           // Refresh the companies List
-          const response = await axios.get('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/companies', {
+          const response = await axios.get('http://localhost:5000/api/companies', {
             params: { customerId },
           });
           setCompanies(response.data);
@@ -168,6 +191,8 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
       console.log(`Error openning configuration for ${integrationKey}`, error);
     }
   };
+
+  
 
 
   return (
@@ -198,6 +223,15 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
                 <button onClick={() => handleConfigure(integration.key)}>
                   Configure {integration.name}
                   </button>
+            <label style={{marginLeft: '10px' }}>
+              <input 
+              type="checkbox"
+              checked={flowStatuses[integration.key] || false} // Dynamically set checked status
+              onChange={(e) => handleToggleFlow(integration.key, e.target.checked)}
+              />
+            </label>
+
+
               </div>
           </li>
         ))}
