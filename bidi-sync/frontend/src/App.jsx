@@ -11,7 +11,7 @@ function App() {
     useEffect(() => {
       const fetchToken = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/generate-token', {
+            const response = await axios.post('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/generate-token', {
                 customerId,
                 customerName,
             });
@@ -25,6 +25,11 @@ function App() {
 
     fetchToken();
     }, []);
+
+        // Render a loading spinner or placeholder while the token is being fetched
+        if (!token) {
+        return <div>Loading...</div>;
+  }
 
 
     return (
@@ -40,6 +45,9 @@ function App() {
       //     )}
       //   </div>
       // );
+
+        
+
 
       <IntegrationAppProvider token={token}>
       <MyComponent customerId={customerId} />
@@ -71,7 +79,7 @@ function MyComponent({ customerId }) {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/companies', {
+        const response = await axios.get('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/companies', {
           params: { customerId },
         });
         console.log('Fetched companies', response.data);
@@ -84,36 +92,72 @@ function MyComponent({ customerId }) {
     fetchCompanies();
   }, [customerId]);
 
-// Function to fetch companies from hubspot via integration.app and update database
-const handleFetchHubSpotCompanies = async () => {
+// Function to fetch companies from CRMs
+const fetchCompaniesFromConnectedIntegrations = async () => {
   try {
-      const response1 = await integrationApp.connection('hubspot').action('get-companies').run({});
-      console.log('HubSpot Response:', response1);
-        const data = response1.output.records;
-          console.log('Companies:', data);
+      const connectedIntegrations = integrations.filter(
+          (integration) => integration.connection?.disconnected === false
+      );
 
-          // Send companies to server.js for storage
-          await axios.post('http://localhost:5000/api/add-companies', {
+      console.log("Connected Integrations", connectedIntegrations);
+
+      for (const integration of connectedIntegrations) {
+        try {
+          console.log(`Fetching integrations for integration: ${integration.name}`);
+
+          // Fetch companies from the current integration
+          const response = await integrationApp.connection(integration.key).action('get-companies').run({});
+          
+          console.log(`companies for ${integration.name}:`, response.output.records);
+
+          const companies = response.output.records.map((company) => ({
+            name: company.fields.name || 'N/A',
+            domain: company.fields.domain || 'N/A',
+            address: company.fields.primaryAddress?.full || 'N/A',
+          })
+        );
+
+        console.log(`processed companies for ${integration.name}:`, companies);
+
+        await axios.post('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/add-companies', {
             customerId,
-            companies: data.map((company) => ({
-              name: company.fields.name || 'N/A',
-          domain: company.fields.websiteUrl || 'N/A',
-          address: company.fields.primaryAddress?.full || 'N/A',
-            })),
-          });
+            companies,
+        });
+
+        console.log(`Successfully stored companies for integration: ${integration.name}`);
+          } catch (innerError) {
+          console.error(`Error fetching companies for ${integration.name}:`, innerError.message);
+        }
+
+      };
+
+      // const response1 = await integrationApp.connection('hubspot').action('get-companies').run({});
+      // console.log('HubSpot Response:', response1);
+      //   const data = response1.output.records;
+      //     console.log('Companies:', data);
+
+      //     // Send companies to server.js for storage
+      //     await axios.post('http://localhost:5000/api/add-companies', {
+      //       customerId,
+      //       companies: data.map((company) => ({
+      //         name: company.fields.name || 'N/A',
+      //     domain: company.fields.websiteUrl || 'N/A',
+      //     address: company.fields.primaryAddress?.full || 'N/A',
+      //       })),
+      //     });
 
           // Refresh the companies List
-          const response = await axios.get('http://localhost:5000/api/companies', {
+          const response = await axios.get('https://ominous-space-tribble-x44jrxrw95jcprjj-5000.app.github.dev/api/companies', {
             params: { customerId },
           });
           setCompanies(response.data);
 
           alert('Integration companies have been added succesfully');
 
-  } catch (error) {
-        console.error('error fetching companies', error);
-        alert('failed to fetch companies from Action');
-    };
+      } catch (error) {
+            console.error('error fetching companies', error);
+            alert('failed to fetch companies from Action');
+        };
 };
 
   // Function to open the configuration modal for a specific integration
@@ -159,7 +203,7 @@ const handleFetchHubSpotCompanies = async () => {
         ))}
       </ul>
       <hr></hr>
-      <button onClick={handleFetchHubSpotCompanies}>Fetch companies 'hubspot'</button>
+      <button onClick={fetchCompaniesFromConnectedIntegrations}>Fetch companies</button>
 
       <hr></hr>
       <h2>Companies</h2>
