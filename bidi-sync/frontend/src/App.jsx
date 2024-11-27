@@ -87,38 +87,32 @@ function MyComponent({ customerId }) {
 // Function to fetch companies from hubspot via integration.app and update database
 const handleFetchHubSpotCompanies = async () => {
   try {
-    //Fetch companies from hubspot
+      const response1 = await integrationApp.connection('hubspot').action('get-companies').run({});
+      console.log('HubSpot Response:', response1);
+        const data = response1.output.records;
+          console.log('Companies:', data);
 
+          // Send companies to server.js for storage
+          await axios.post('http://localhost:5000/api/add-companies', {
+            customerId,
+            companies: data.map((company) => ({
+              name: company.fields.name || 'N/A',
+          domain: company.fields.websiteUrl || 'N/A',
+          address: company.fields.primaryAddress?.full || 'N/A',
+            })),
+          });
 
-    // const { data } = await integrationApp.connection('hubspot').action('get-companies').run({});
+          // Refresh the companies List
+          const response = await axios.get('http://localhost:5000/api/companies', {
+            params: { customerId },
+          });
+          setCompanies(response.data);
 
-
-const response1 = await integrationApp.connection('hubspot').action('get-companies').run({});
-console.log('HubSpot Response:', response1);
-   const data = response1.output.records;
-    console.log('Companies:', data);
-
-    // Send companies to server.js for storage
-    await axios.post('http://localhost:5000/api/add-companies', {
-      customerId,
-      companies: data.map((company) => ({
-        name: company.fields.name || 'N/A',
-    domain: company.fields.websiteUrl || 'N/A',
-    address: company.fields.primaryAddress?.full || 'N/A',
-      })),
-    });
-
-    // Refresh the companies List
-    const response = await axios.get('http://localhost:5000/api/companies', {
-      params: { customerId },
-    });
-    setCompanies(response.data);
-
-    alert('Hubspot companies have been added succesfully');
+          alert('Integration companies have been added succesfully');
 
   } catch (error) {
         console.error('error fetching companies', error);
-        alert('failed to fetch companies from hubspot');
+        alert('failed to fetch companies from Action');
     };
 };
 
