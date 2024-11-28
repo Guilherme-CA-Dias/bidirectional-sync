@@ -4,8 +4,8 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-    const customerId = '12345'; // Fixed customer ID
-    const customerName = 'John Doe'; // Fixed customer Name
+    const customerId = Math.random().toString(36).substring(2, 14).padEnd(12, '0'); // 12-character alphanumeric ID
+    const customerName = `Customer-${Math.random().toString(36).substring(7)}`; // Random customer name
     const [token, setToken] = useState('');
 
     useEffect(() => {
@@ -31,24 +31,7 @@ function App() {
         return <div>Loading...</div>;
   }
 
-
     return (
-      //   <div className="App">
-      //     <div>
-      //       <button onClick={generateToken}>Generate Token</button>
-      //     </div>
-      //     {token && (
-      //       <div>
-      //         <h3>Generated Token:</h3>
-      //         <textarea readOnly value={token} rows="5" cols="60"></textarea>
-      //       </div>
-      //     )}
-      //   </div>
-      // );
-
-        
-
-
       <IntegrationAppProvider token={token}>
       <MyComponent customerId={customerId} />
     </IntegrationAppProvider>
@@ -59,15 +42,23 @@ function MyComponent({ customerId }) {
   const integrationApp = useIntegrationApp();
   const [integrations, setIntegrations] = useState([]);
   const [flowStatuses, setFlowStatuses] = useState({}); // State to track flow statuses
-  const [companies, setCompanies] = useState([])
+  const [connectionStatuses, setConnectionStatuses] = useState({}); // State for connection statuses
+  const [companies, setCompanies] = useState([]);
 
- // Fetch integrations and flow statuses
+  // Fetch integrations, connection statuses, and flow statuses
   useEffect(() => {
-    const fetchIntegrationsAndFlows = async () => {
+    const fetchIntegrationsAndStatuses  = async () => {
       try {
         const { items: integrations } = await integrationApp.integrations.find();
         console.log("Fetched Integrations Payload", integrations); // Log payload for debugging
         setIntegrations(integrations);
+
+        // Initialize connection statuses
+        const connections = {};
+        integrations.forEach((integration) => {
+          connections[integration.key] = integration.connection?.disconnected === false;
+        });
+        setConnectionStatuses(connections);
 
         // Fetch flow statuses only for connected integrations
         const connectedIntegrations = integrations.filter(
@@ -87,7 +78,12 @@ function MyComponent({ customerId }) {
       }
     };
 
-    fetchIntegrationsAndFlows();
+    fetchIntegrationsAndStatuses ();
+
+
+    // Periodically refresh connection statuses
+    const interval = setInterval(fetchIntegrationsAndStatuses, 5000);
+    return () => clearInterval(interval);
   }, [integrationApp]);
 
   // Fetch companies for the current customer
@@ -192,8 +188,6 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
     }
   };
 
-  
-
 
   return (
     <div>
@@ -201,6 +195,21 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
       <hr></hr>
       <h2>Avaiable integrations</h2>
       <ul>
+          <li
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontWeight: 'bold',
+              paddingBottom: '10px',
+              borderBottom: '1px solid #ccc',
+            }}
+          >
+            <span style={{ width: '40%' }}>Integration</span>
+            <span style={{ width: '30%', textAlign: 'center' }}>Status</span>
+            <span style={{ width: '30%', textAlign: 'center' }}>Sync Enabled</span>
+          </li>
+
+        {/* Render integration rows */}
         {integrations.map((integration) => (
           <li key={integration.id} style={{ marginBottom: "10px" }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -212,7 +221,7 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
               />
               <span>
                 {integration.name} -{" "}
-                {integration.connection?.disconnected === false ? (
+                {connectionStatuses[integration.key]  ? (
                        <span style={{ color: "green" }}>Connected</span>
                        ) : (
                        <span style={{ color: "red" }}>Not Connected</span>

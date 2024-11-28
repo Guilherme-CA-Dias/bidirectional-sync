@@ -116,6 +116,28 @@ app.post('/api/generate-token', (req, res) => {
     const { customerId } = req.query;
 
     const companies = db.prepare('SELECT * FROM companies WHERE customer_id = ?').all(customerId);
+
+    if (companies.length === 0) {
+    // Preload dummy data for the new customerId
+    const dummyData = [
+      { customer_id: customerId, name: 'Acme Inc.', domain: 'acme.com', address: '123 Acme St' },
+      { customer_id: customerId, name: 'Tech Solutions', domain: 'techsolutions.com', address: '456 Tech Ave' },
+      { customer_id: customerId, name: 'Widgets Corp.', domain: 'widgets.com', address: '789 Widget Blvd' },
+    ];
+
+    const insertStmt = db.prepare(
+      'INSERT INTO companies (customer_id, name, domain, address) VALUES (?, ?, ?, ?)'
+    );
+
+    dummyData.forEach(({ customer_id, name, domain, address }) => {
+      insertStmt.run(customer_id, name, domain, address);
+    });
+
+    // Fetch the newly inserted dummy data
+    const updatedCompanies = db.prepare('SELECT * FROM companies WHERE customer_id = ?').all(customerId);
+    return res.json(updatedCompanies);
+  }
+
     res.json(companies);
   }
   );
