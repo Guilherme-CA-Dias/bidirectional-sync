@@ -100,8 +100,14 @@ function MyComponent({ customerId }) {
       }
     };
 
-    fetchCompanies();
-  }, [customerId]);
+ // Initial fetch
+  fetchCompanies();
+
+  // Polling every 5 seconds to refresh company data
+  const interval = setInterval(fetchCompanies, 5000);
+
+  return () => clearInterval(interval); // Cleanup on unmount
+}, [customerId]);
 
 
  // Toggle flow enable/disable

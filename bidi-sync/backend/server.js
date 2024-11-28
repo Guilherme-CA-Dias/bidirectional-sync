@@ -47,7 +47,7 @@ const WORKSPACE_SECRET = process.env.WORKSPACE_SECRET;
     }
   });
 
-// Add companies fetched from hubspot
+// Add companies fetched from CRM
 app.post('/api/add-companies', (req, res) => {
   const { customerId, companies } = req.body;
 
@@ -65,6 +65,9 @@ app.post('/api/add-companies', (req, res) => {
         insertStmt.run(customerId, name, domain || 'N/A', address || 'N/A');
       }
     });
+
+
+    console.log('Companies added successfully for customer:', customerId);
 
     res.json({ success: true });
   } catch (error) {
@@ -174,5 +177,66 @@ app.get('/api/reset-companies', (req, res) => {
     }
   } else {
     res.status(400).json({ error: 'Invalid query parameter. Use ?clearTable=true to reset the table.' });
+  }
+});
+
+// Endpoint to handle CRM updates from integration.app
+app.post('/api/webhook/updates', (req, res) => {
+  const { customerId, updates } = req.body;
+  const mode = req.query.mode; // Accept query parameter 'mode'
+
+  if (!customerId || !Array.isArray(updates)) {
+    return res.status(400).json({ error: 'Invalid input: customerId and updates array are required.' });
+  }
+
+  if (!['create', 'update', 'delete'].includes(mode)) {
+    return res.status(400).json({ error: 'Invalid mode. Use ?mode=create, ?mode=update, or ?mode=delete.' });
+  }
+
+  try {
+    if (mode === 'create') {
+      const insertStmt = db.prepare('INSERT INTO companies (customer_id, "name", domain, address) VALUES (?, ?, ?, ?)');
+
+      updates.forEach(({ name, domain, address }) => {
+        const exists = db.prepare('SELECT COUNT(*) AS count FROM companies WHERE customer_id = ? AND name = ?').get(customerId, name).count;
+
+        if (exists === 0) {
+          insertStmt.run(customerId, name, domain || 'N/A', address || 'N/A');
+        }
+      });
+
+      console.log(`Created records for customer: ${customerId}`);
+    } else if (mode === 'update') {
+      const updateStmt = db.prepare(
+        `UPDATE companies 
+        SET domain = ?, address = ? 
+        WHERE customer_id = ? AND "name" = ?`
+      );
+
+      updates.forEach(({ name, domain, address }) => {
+        const exists = db.prepare('SELECT COUNT(*) AS count FROM companies WHERE customer_id = ? AND name = ?').get(customerId, name).count;
+
+        if (exists > 0) {
+          updateStmt.run(domain || 'N/A', address || 'N/A', customerId, name);
+        }
+      });
+
+      console.log(`Updated records for customer: ${customerId}`);
+    } else if (mode === 'delete') {
+      const deleteStmt = db.prepare(
+        'DELETE FROM companies WHERE customer_id = ? AND "name" = ?'
+      );
+
+      updates.forEach(({ name }) => {
+        deleteStmt.run(customerId, name);
+      });
+
+      console.log(`Deleted records for customer: ${customerId}`);
+    }
+
+    res.json({ success: true, message: `Processed ${mode} operation for customer: ${customerId}` });
+  } catch (error) {
+    console.error(`Error processing ${mode} operation for updates:`, error.message);
+    res.status(500).json({ error: `Failed to process ${mode} operation for updates.` });
   }
 });
