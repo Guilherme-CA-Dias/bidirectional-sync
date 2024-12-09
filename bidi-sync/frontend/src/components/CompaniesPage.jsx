@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IntegrationAppProvider, useIntegrationApp, IntegrationAppClient } from '@integration-app/react';
 import { fetchIntegrationsAndStatuses } from '../utils/utils';
 import axios from 'axios';
+import * as Tabs from '@radix-ui/react-tabs';
 import '../App.css';
 
 
@@ -103,15 +104,22 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
     <div>
       <h2>Companies</h2>
       <hr />
-      <button onClick={fetchCompaniesFromConnectedIntegrations}>Fetch companies</button>
+      <button onClick={fetchCompaniesFromConnectedIntegrations} className="global-button">Fetch companies</button>
       <hr />
-      <ul>
+<div className="CompaniesTable">
+        <div className="CompaniesHeader">
+          <span>Company Name</span>
+          <span>Domain</span>
+          <span>Address</span>
+        </div>
         {companies.map((company) => (
-          <li key={company.id}>
-            <strong>{company.name}</strong> - {company.domain} - {company.address}
-          </li>
+          <div key={company.id} className="CompanyRow">
+            <span>{company.name}</span>
+            <span>{company.domain}</span>
+            <span>{company.address}</span>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

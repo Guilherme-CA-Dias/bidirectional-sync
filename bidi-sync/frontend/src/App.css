@@ -36,3 +36,264 @@
     transform: rotate(360deg);
   }
 }
+
+
+.TabsRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.TabsList {
+  display: flex;
+  gap: 8px;
+}
+
+.TabsTrigger {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.TabsContent {
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.CompanyItem {
+  padding: 8px 0;
+}
+
+.IntegrationItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.IntegrationLogo {
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+}
+
+.switch-root {
+  all: unset;
+  width: 40px;
+  height: 20px;
+  background-color: lightgray;
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+}
+
+.switch-root[data-state="checked"] {
+  background-color: green;
+}
+
+.switch-thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 100ms;
+  transform: translateX(2px);
+  position: absolute;
+  top: 1px;
+}
+
+.switch-root[data-state="checked"] .switch-thumb {
+  transform: translateX(22px);
+}
+
+/* Navigation menu styling*/
+
+.NavigationMenuRoot {
+  display: flex;
+  justify-content: center;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.NavigationMenuList {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.NavigationMenuLink {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.NavigationMenuLink:hover {
+  color: #007bff;
+}
+
+.NavigationMenuLink.active {
+  font-weight: bold;
+  color: #0056b3;
+}
+
+/* END Navigation menu styling*/
+
+.global-button {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: bold;
+}
+
+.global-button:hover {
+  background-color: #0056b3;
+  border-color: #003f7f;
+}
+
+.configure-button {
+  background-color: #f1f1f1;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 250px; /* Set a fixed width for consistency */
+  transition: all 0.3s ease;
+}
+
+.configure-button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+.configure-button.active:hover {
+  background-color: #0056b3;
+  border-color: #003f7f;
+}
+
+.configure-button.disabled {
+  background-color: #e0e0e0;
+  color: #a0a0a0;
+  border-color: #ccc;
+}
+
+.configure-button:disabled:hover {
+  background-color: #eeebc0;
+  color: #af9dc8;
+  border-color: #9f8cfc;
+}
+
+
+/* Integration List Styling */
+.IntegrationList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  padding-left: 20px;
+}
+
+.IntegrationHeader {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.IntegrationRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.IntegrationColumn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 40%;
+}
+
+.StatusColumn {
+  width: 30%;
+  text-align: center;
+}
+
+.SyncColumn {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+}
+
+.IntegrationLogo {
+  width: 24px;
+  height: 24px;
+}
+
+/*END Integration List Styling */
+
+
+/* Companies Page Styles */
+
+.CompaniesPage {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.CompaniesPage h2 {
+  text-align: left;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.global-button:hover {
+  background-color: #0056b3;
+  border-color: #003f7f;
+}
+
+.CompaniesTable {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.CompaniesHeader,
+.CompanyRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.CompaniesHeader {
+  font-weight: bold;
+  background-color: #e6e6e6;
+  text-align: center;
+  justify-content: center;
+}
+
+.CompanyRow span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* END Companies Page Styles */

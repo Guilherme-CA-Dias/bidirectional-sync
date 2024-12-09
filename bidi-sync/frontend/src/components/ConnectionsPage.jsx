@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useIntegrationApp } from '@integration-app/react';
 import { fetchIntegrationsAndStatuses } from '../utils/utils';
+import * as Switch from '@radix-ui/react-switch';
 import axios from 'axios';
+import '../App.css';
 
 
 function ConnectionsPage({ customerId }) {
@@ -61,58 +63,62 @@ function ConnectionsPage({ customerId }) {
 
     return (
     <div>
-        <div>
-             <button onClick={() => integrationApp.open()}>Select and connect to integrations using our UI</button>
-             <hr />
+      <button
+        onClick={() => integrationApp.open()}
+        className="global-button"
+      >
+        Select and connect to integrations using our UI
+      </button>
+      <hr />
       <h2>Available Integrations</h2>
-      <ul>
-        <li
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontWeight: 'bold',
-            paddingBottom: '10px',
-            borderBottom: '1px solid #ccc',
-          }}
-        >
-          <span style={{ width: '40%' }}>Integration</span>
-          <span style={{ width: '30%', textAlign: 'center' }}>Status</span>
-          <span style={{ width: '30%', textAlign: 'center' }}>Sync Enabled</span>
+      <ul className="IntegrationList">
+        <li className="IntegrationHeader">
+          <span className="IntegrationColumn">Integration</span>
+          <span className="StatusColumn">Status</span>
+          <span className="SyncColumn">Sync Enabled</span>
         </li>
 
         {integrations.map((integration) => (
-          <li key={integration.id} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <img
-                  src={integration.logoUri}
-                  alt={integration.name}
-                  style={{ width: '30px', height: '30px', marginRight: '10px' }}
-                />
-                <span>
-                  {integration.name} -{' '}
-                  {connectionStatuses[integration.key] ? (
-                    <span style={{ color: 'green' }}>Connected</span>
-                  ) : (
-                    <span style={{ color: 'red' }}>Not Connected</span>
-                  )}
-                </span>
-              </div>
-              <button onClick={() => integrationApp.integration(integration.key).open()}>
-                Configure {integration.name}
+          <li key={integration.id} className="IntegrationRow">
+            <span className="IntegrationColumn">
+              <img
+                src={integration.logoUri}
+                alt={integration.name}
+                className="IntegrationLogo"
+              />
+              {integration.name}
+            </span>
+            <span className="StatusColumn">
+              <button
+                onClick={() => integrationApp.integration(integration.key).open()}
+                className={`configure-button ${
+                  connectionStatuses[integration.key] ? 'active' : 'disabled'
+                }`}
+                title={
+                  connectionStatuses[integration.key]
+                    ? `Configure ${integration.name}`
+                    : `Connect to ${integration.name}`
+                }
+              >
+                {connectionStatuses[integration.key]
+                  ? `Configure ${integration.name}`
+                  : `Connect ${integration.name}`}
               </button>
-              <label style={{ marginLeft: '10px' }}>
-                <input
-                  type="checkbox"
-                  checked={flowStatuses[integration.key] || false}
-                  onChange={(e) => handleToggleFlow(integration.key, e.target.checked)}
-                />
-              </label>
-            </div>
+            </span>
+            <span className="SyncColumn">
+              <Switch.Root
+                className="switch-root"
+                checked={flowStatuses[integration.key] || false}
+                onCheckedChange={(isChecked) =>
+                  handleToggleFlow(integration.key, isChecked)
+                }
+              >
+                <Switch.Thumb className="switch-thumb" />
+              </Switch.Root>
+            </span>
           </li>
         ))}
       </ul>
-    </div>
     </div>
   );
 }

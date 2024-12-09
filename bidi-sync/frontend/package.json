@@ -4,6 +4,10 @@
   "private": true,
   "dependencies": {
     "@integration-app/react": "^2.0.2",
+    "@radix-ui/react-navigation-menu": "^1.2.1",
+    "@radix-ui/react-switch": "^1.1.1",
+    "@radix-ui/react-tabs": "^1.1.1",
+    "@radix-ui/react-tooltip": "^1.1.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

@@ -4,6 +4,7 @@ import { IntegrationAppProvider, useIntegrationApp, IntegrationAppClient } from 
 import axios from 'axios';
 import CompaniesPage from './components/CompaniesPage';
 import ConnectionsPage from './components/ConnectionsPage';
+import Navbar from './components/Navbar'; // Include the Navbar component
 import './App.css';
 
 function App() {
@@ -62,21 +63,14 @@ function MainApp({ customerId }) {
 
   return (
      <Router>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Connections</Link>
-            </li>
-            <li>
-              <Link to="/companies">Companies</Link>
-            </li>
-          </ul>
-        </nav>
+      <Navbar />
+      <div className="AppContent">
         <Routes>
           <Route path="/" element={<ConnectionsPage customerId={customerId} />} />
           <Route path="/companies" element={<CompaniesPage customerId={customerId} integrations={integrations} />} />
         </Routes>
-      </Router>
+      </div>
+    </Router>
   );
 }
 
