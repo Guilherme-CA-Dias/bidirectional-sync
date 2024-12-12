@@ -3,6 +3,7 @@ import { IntegrationAppProvider, useIntegrationApp, IntegrationAppClient } from 
 import { fetchIntegrationsAndStatuses } from '../utils/utils';
 import axios from 'axios';
 import * as Tabs from '@radix-ui/react-tabs';
+import CompanyForm from './CompanyForm';
 import '../App.css';
 
 
@@ -10,6 +11,12 @@ function CompaniesPage({ customerId }) {
   const integrationApp = useIntegrationApp();
   const [integrations, setIntegrations] = useState([]);
   const [companies, setCompanies] = useState([]);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [formData, setFormData] = useState({
+    name: '',
+    domain: '',
+    address: '',
+  })
 
 
     useEffect(() => {
@@ -100,13 +107,41 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
         };
 };
 
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/api/webhook/updates?mode=create', { //Change it to the event handler in iApp
+        customerId,
+        updates: [formData],
+      });
+      alert('Company information sent to integration.app successfully!');
+      setFormData({ name: '', domain: '', address: '' });
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error('Error sending company information:', error);
+      alert('Failed to send company information.');
+    }
+  };
+
   return (
     <div>
       <h2>Companies</h2>
       <hr />
-      <button onClick={fetchCompaniesFromConnectedIntegrations} className="global-button">Fetch companies</button>
+            <button onClick={fetchCompaniesFromConnectedIntegrations} className="global-button">Fetch companies</button>
+    <button className="global-button" onClick={() => setIsFormOpen(true)}>
+      Add Company
+    </button>
+    <hr />
+    
+    <CompanyForm
+      isOpen={isFormOpen}
+      onClose={() => setIsFormOpen(false)}
+      onSubmit={handleFormSubmit}
+      formData={formData}
+      setFormData={setFormData}
+    />
       <hr />
-<div className="CompaniesTable">
+        <div className="CompaniesTable">
         <div className="CompaniesHeader">
           <span>Company Name</span>
           <span>Domain</span>

@@ -190,7 +190,7 @@
   border-color: #ccc;
 }
 
-.configure-button:disabled:hover {
+.configure-button.disabled:hover {
   background-color: #eeebc0;
   color: #af9dc8;
   border-color: #9f8cfc;
@@ -259,11 +259,6 @@
   text-align: left;
   font-size: 24px;
   margin-bottom: 20px;
-}
-
-.global-button:hover {
-  background-color: #0056b3;
-  border-color: #003f7f;
 }
 
 .CompaniesTable {
