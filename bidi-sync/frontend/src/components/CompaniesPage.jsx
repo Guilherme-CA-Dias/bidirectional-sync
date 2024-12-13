@@ -32,11 +32,12 @@ function CompaniesPage({ customerId }) {
   // Fetch companies for the current customer
   useEffect(() => {
     const fetchCompanies = async () => {
+      console.log("CustomerId used for companies:", customerId); // Log customerId
       try {
         const response = await axios.get('http://localhost:5000/api/companies', {
           params: { customerId },
         });
-        console.log('Fetched companies', response.data);
+        // console.log('Fetched companies', response.data);
         setCompanies(response.data);
       } catch (error) {
         console.log('Error Fetching companies', error);
@@ -109,19 +110,39 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    const payload = {
+      type: 'created',
+      customerId: customerId,
+      data: {
+        name: formData.name,
+        websiteUrl: formData.domain,
+        address: formData.address,
+      },
+    };
+
     try {
-      await axios.post('http://localhost:5000/api/webhook/updates?mode=create', { //Change it to the event handler in iApp
-        customerId,
-        updates: [formData],
-      });
-      alert('Company information sent to integration.app successfully!');
-      setFormData({ name: '', domain: '', address: '' });
-      setIsFormOpen(false);
+      const response = await axios.post(
+        'https://api.integration.app/webhooks/app-events/4dfa937d-989d-4976-883e-ab2af9270273',
+        payload
+      );
+
+      console.log('Response from integration.app:', response.data);
+
+      if (response.status === 200) {
+        alert('Company information sent successfully!');
+        setFormData({ name: '', domain: '', address: '' });
+        setIsFormOpen(false);
+      } else {
+        alert('Failed to send company information. Please try again.');
+      }
     } catch (error) {
       console.error('Error sending company information:', error);
-      alert('Failed to send company information.');
+      alert('An error occurred while sending company information.');
     }
   };
+
+
 
   return (
     <div>

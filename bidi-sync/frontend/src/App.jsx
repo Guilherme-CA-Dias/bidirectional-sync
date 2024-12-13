@@ -8,12 +8,19 @@ import Navbar from './components/Navbar'; // Include the Navbar component
 import './App.css';
 
 function App() {
-    const customerId = Math.random().toString(36).substring(2, 14).padEnd(12, '0'); // 12-character alphanumeric ID
+    const [customerId, setCustomerId] = useState(() => {
+        // Use sessionStorage for per-session uniqueness
+        return sessionStorage.getItem('customerId') || Math.random().toString(36).substring(2, 14).padEnd(12, '0');
+    });
     const customerName = `Customer-${Math.random().toString(36).substring(7)}`; // Random customer name
     const [token, setToken] = useState('');
 
     useEffect(() => {
+      // Save customerId to localStorage to persist across reloads
+      sessionStorage.setItem('customerId', customerId);
+
       const fetchToken = async () => {
+        console.log("CustomerId for token generation:", customerId);
         try {
             const response = await axios.post('http://localhost:5000/api/generate-token', {
                 customerId,
@@ -28,7 +35,7 @@ function App() {
    
 
     fetchToken();
-    }, []);
+    }, [customerId]);
 
         // Render a loading spinner or placeholder while the token is being fetched
         if (!token) {
