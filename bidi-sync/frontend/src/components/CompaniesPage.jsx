@@ -65,12 +65,17 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
       console.log("Connected Integrations", connectedIntegrations);
 
       for (const integration of connectedIntegrations) {
+        let cursor = null;
+
+      do {
         try {
-          console.log(`Fetching integrations for integration: ${integration.name}`);
+          console.log(`Fetching integrations for integration: ${integration.name} ${cursor ? `(cursor: ${cursor})` : ""}`);
 
           // Fetch companies from the current integration
-          const response = await integrationApp.connection(integration.key).action('get-companies').run({});
+          const response = await integrationApp.connection(integration.key).action('get-companies').run(cursor ? { cursor } : {});  // Pass cursor if available
           
+          cursor = response.output?.cursor || null; // Update cursor
+
           console.log(`companies for ${integration.name}:`, response.output.records);
 
           const companies = response.output.records.map((company) => ({
@@ -89,10 +94,13 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
 
         console.log(`Successfully stored companies for integration: ${integration.name}`);
           } catch (innerError) {
-          console.error(`Error fetching companies for ${integration.name}:`, innerError.message);
+          console.error(`Error fetching companies for ${integration.name}:`, 
+            innerError.message
+          );
+          cursor = null; // Stop pagination on error
         }
 
-      };
+      }  while (cursor);}
 
           // Refresh the companies List
           const response = await axios.get('http://localhost:5000/api/companies', {
