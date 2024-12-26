@@ -18,7 +18,7 @@ function CompaniesPage({ customerId }) {
   })
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [formType, setFormType] = useState('create'); // 'create', 'update', or 'delete'
+  const [formType, setFormType] = useState('created'); // 'created', 'update', or 'delete'
 
 
     useEffect(() => {
@@ -64,6 +64,13 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
     const connectedIntegrations = integrations.filter(
       (integration) => integration.connection?.disconnected === false
     );
+
+    // Check if there are any connected integrations
+    if (connectedIntegrations.length === 0) {
+      alert('No connected integrations found. Please connect to at least one integration first.');
+      setIsLoading(false);
+      return;
+    }
 
     console.log("Connected Integrations", connectedIntegrations);
 
@@ -177,25 +184,25 @@ const fetchCompaniesFromConnectedIntegrations = async () => {
             className="global-button"
             disabled={isLoading}
           >
-            {isLoading ? 'Fetching...' : 'Fetch companies'}
+            {isLoading ? 'Fetching...' : 'Fetch Companies'}
           </button>
           {!isFormOpen ? (
             <div className="crud-buttons">
               <button 
                 className="global-button"
-                onClick={() => handleOpenForm('create')}
+                onClick={() => handleOpenForm('created')}
               >
                 Add Company
               </button>
               <button 
                 className="global-button"
-                onClick={() => handleOpenForm('update')}
+                onClick={() => handleOpenForm('updated')}
               >
                 Update Company
               </button>
               <button 
                 className="global-button"
-                onClick={() => handleOpenForm('delete')}
+                onClick={() => handleOpenForm('deleted')}
               >
                 Delete Company
               </button>

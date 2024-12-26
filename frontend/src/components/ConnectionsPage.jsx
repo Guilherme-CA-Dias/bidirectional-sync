@@ -34,6 +34,24 @@ function ConnectionsPage({ customerId }) {
    // Toggle flow enable/disable
   const handleToggleFlow = async (integrationKey, isChecked) => {
     try {
+      if (isChecked) {
+        // Create the flow if enabling
+        try {
+          await integrationApp
+            .connection(integrationKey)
+            .flow('receive-company-events')
+            .create();
+          
+          console.log(`Flow created for ${integrationKey}`);
+        } catch (error) {
+          // If error is because flow already exists, continue
+          if (!error.message.includes('already exists')) {
+            throw error;
+          }
+        }
+      }
+
+      // Update the flow status
       await integrationApp
         .connection(integrationKey)
         .flow('receive-company-events')
@@ -48,6 +66,12 @@ function ConnectionsPage({ customerId }) {
     } catch (error) {
       console.error(`Error toggling flow for ${integrationKey}:`, error.message);
       alert('Failed to update flow status.');
+      
+      // Revert the toggle state in case of error
+      setFlowStatuses((prev) => ({
+        ...prev,
+        [integrationKey]: !isChecked,
+      }));
     }
   };
 

@@ -5,11 +5,11 @@ function CompanyForm({ isOpen, onClose, onSubmit, formData, setFormData, formTyp
 
   const getFormTitle = () => {
     switch (formType) {
-      case 'create':
+      case 'created':
         return 'Add New Company';
-      case 'update':
+      case 'updated':
         return 'Update Company';
-      case 'delete':
+      case 'deleted':
         return 'Delete Company';
       default:
         return 'Company Form';
@@ -18,9 +18,9 @@ function CompanyForm({ isOpen, onClose, onSubmit, formData, setFormData, formTyp
 
   const getDescriptionText = () => {
     switch (formType) {
-      case 'update':
+      case 'updated':
         return 'Enter the company name to update. The company with matching name will be updated with the new information.';
-      case 'delete':
+      case 'deleted':
         return 'Enter the company name to delete. The company with matching name will be removed.';
       default:
         return null;
@@ -58,7 +58,7 @@ function CompanyForm({ isOpen, onClose, onSubmit, formData, setFormData, formTyp
             <label style={{ display: 'block', marginBottom: '5px' }}>
               Company Name
             </label>
-            {formType !== 'create' && (
+            {formType !== 'created' && (
               <div style={{ 
                 fontSize: '12px', 
                 color: '#666', 
@@ -144,8 +144,8 @@ function CompanyForm({ isOpen, onClose, onSubmit, formData, setFormData, formTyp
               className="global-button"
               style={{ width: 'auto' }}
             >
-              {formType === 'create' ? 'Add Company' : 
-               formType === 'update' ? 'Update Company' : 
+              {formType === 'created' ? 'Add Company' : 
+               formType === 'updated' ? 'Update Company' : 
                'Delete Company'}
             </button>
           </div>
