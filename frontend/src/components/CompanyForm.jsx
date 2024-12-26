@@ -1,7 +1,31 @@
 import React from 'react';
 
-const CompanyForm = ({ isOpen, onClose, onSubmit, formData, setFormData }) => {
+function CompanyForm({ isOpen, onClose, onSubmit, formData, setFormData, formType }) {
   if (!isOpen) return null;
+
+  const getFormTitle = () => {
+    switch (formType) {
+      case 'create':
+        return 'Add New Company';
+      case 'update':
+        return 'Update Company';
+      case 'delete':
+        return 'Delete Company';
+      default:
+        return 'Company Form';
+    }
+  };
+
+  const getDescriptionText = () => {
+    switch (formType) {
+      case 'update':
+        return 'Enter the company name to update. The company with matching name will be updated with the new information.';
+      case 'delete':
+        return 'Enter the company name to delete. The company with matching name will be removed.';
+      default:
+        return null;
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,7 +39,7 @@ const CompanyForm = ({ isOpen, onClose, onSubmit, formData, setFormData }) => {
     <div className="fixed inset-0 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-full max-w-md" style={{ fontFamily: 'Arial, sans-serif' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '24px', margin: 0 }}>Add New Company</h2>
+          <h2 style={{ fontSize: '24px', margin: 0 }}>{getFormTitle()}</h2>
           <button 
             onClick={onClose}
             style={{ 
@@ -34,6 +58,19 @@ const CompanyForm = ({ isOpen, onClose, onSubmit, formData, setFormData }) => {
             <label style={{ display: 'block', marginBottom: '5px' }}>
               Company Name
             </label>
+            {formType !== 'create' && (
+              <div style={{ 
+                fontSize: '12px', 
+                color: '#666', 
+                marginBottom: '8px',
+                padding: '8px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '4px',
+                border: '1px solid #e9ecef'
+              }}>
+                {getDescriptionText()}
+              </div>
+            )}
             <input
               type="text"
               name="name"
@@ -107,13 +144,15 @@ const CompanyForm = ({ isOpen, onClose, onSubmit, formData, setFormData }) => {
               className="global-button"
               style={{ width: 'auto' }}
             >
-              Add Company
+              {formType === 'create' ? 'Add Company' : 
+               formType === 'update' ? 'Update Company' : 
+               'Delete Company'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-};
+}
 
 export default CompanyForm;
